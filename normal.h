@@ -6,7 +6,7 @@ vector <vector <double>> transpose(vector <vector <double>> & matrix_a, int m, i
 
 vector <vector <double>> mult(vector <vector <double>> matrix_left, vector< vector<double>> matrix_right);
 
-vector <double> reverse_Gaussian(vector <vector <double>> & matrix_a, vector <double> & phi, int N);
+vector <double> cholesky_decomposition(vector <vector <double>> & matrix_a, vector <double> & phi, int N);
 
 vector <double> normal_equation(vector <vector <double>> & matrix_a, vector <double> & phi, int m, int N);
 
