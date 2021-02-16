@@ -29,22 +29,59 @@ vector <vector <double>> mult(vector <vector <double>> matrix_left, vector< vect
   return matrix;
 }
 
-vector <double> reverse_Gaussian(vector <vector <double>> & matrix_a, vector <double> & phi, int N)
+vector <double> cholesky_decomposition(vector <vector <double>> & matrix_a, vector <double> & phi, int N)
 {
-    double buffer_1, buffer_2;
-    vector <double> matrix_x(N);
-    
-    for (int i = N - 1; i >= 0; --i)
+    vector <vector <double>> L(N, vector <double> (N, 0)), T(N, vector <double> (N, 0));
+    vector <double> x(N, 0), v(N, 0);
+    double sum = 0, buffer = 0;
+
+    L[0][0] = sqrt(matrix_a[0][0]);
+    for (int i = 1; i < N; i++)
+        L[i][0] = matrix_a[i][0] / L[0][0];
+ 
+    for (int i = 1; i < N; ++i)
     {
-        buffer_1 = 0.;
+        sum = 0;
+        for (int j = 0; j < i; ++j)
+            sum = sum + pow(L[i][j],2);
+        buffer = matrix_a[i][i] - sum;
+        L[i][i]=sqrt(buffer);
+ 
         for (int j = i + 1; j < N; ++j)
         {
-            buffer_2 = matrix_a[i][j] * matrix_x[j];
-            buffer_1 += buffer_2;
+            sum = 0;
+            for (int k = 0; k < i; ++k)
+                sum = sum + L[j][k] * L[i][k];
+            buffer = matrix_a[j][i] - sum;
+            L[j][i] = buffer / L[i][i];
         }
-        matrix_x[i] = (phi[i] - buffer_1) / matrix_a[i][i];
     }
-    return matrix_x;
+ 
+    for (int i = 0; i < N; ++i)
+        for (int j = 0; j < N; ++j)
+            T[i][j]=L[j][i];
+    
+    v[0] = phi[0] / L[0][0];
+    for (int i = 1; i < N; ++i)
+    {
+        sum = 0;
+        for (int j = 0; j < i; ++j)
+            sum = sum + L[i][j] * v[j];
+        buffer = phi[i] - sum;
+        v[i] = buffer / L[i][i];
+    }
+
+    x[N - 1] = v[N - 1] / T[N - 1][N - 1];
+    for (int i = N - 2; i >= 0; --i)
+    {
+        sum = 0;
+        for (int j = i + 1; j < N; j++)
+            sum = sum + T[i][j] * x[j];
+        buffer = v[i] - sum;
+        x[i] = buffer / T[i][i];
+    }
+
+    return x;
 }
 
 vector <double> normal_equation(vector <vector <double>> & matrix_a, vector <double> & phi, int m, int N)
@@ -61,7 +98,7 @@ vector <double> normal_equation(vector <vector <double>> & matrix_a, vector <dou
             ATphi[i] += AT[i][j] * phi[j];
         }
     
-    x = reverse_Gaussian(ATA, ATphi, N);
+    x = cholesky_decomposition(ATA, ATphi, N);
     return x;
 }
 
